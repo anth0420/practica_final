@@ -1,0 +1,46 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Descargar el repositorio
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Configurar Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    # 3. Instalar dependencias
+    - name: Install dependencies
+      run: |
+        npm install
+        npm ci # Limpia y reconstruye el entorno para evitar conflictos
+
+    # 4. Mostrar estructura de archivos para diagnóstico
+    - name: Show file structure
+      run: ls -R
+
+    # 5. Ejecutar pruebas unitarias
+    - name: Run unit tests
+      run: npm test
+
+    # 6. Guardar resultados de pruebas en caso de fallos
+    - name: Archive test results
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test-results/
